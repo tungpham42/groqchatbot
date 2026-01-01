@@ -183,7 +183,7 @@ const GroqChatbot: React.FC = () => {
             <GlobalOutlined style={{ fontSize: 20 }} />
           </div>
           <div>
-            <div className="header-title">Trợ Lý Việt</div>
+            <div className="header-title">Trợ Lý Ảo</div>
           </div>
         </div>
 
