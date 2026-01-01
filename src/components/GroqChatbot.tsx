@@ -396,11 +396,13 @@ const GroqChatbot: React.FC = () => {
                   borderRadius: 8,
                 }}
               >
+                {/* FLEX FIX FOR SIDEBAR LAYOUT */}
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    width: "100%",
                   }}
                 >
                   <div
@@ -408,16 +410,18 @@ const GroqChatbot: React.FC = () => {
                       display: "flex",
                       alignItems: "center",
                       gap: 10,
+                      flex: 1, // Take available space
+                      minWidth: 0, // Allow shrinking below content size
                       overflow: "hidden",
                     }}
                   >
-                    <MessageOutlined />
+                    <MessageOutlined style={{ flexShrink: 0 }} />
                     <span
                       style={{
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-                        maxWidth: 140,
+                        flex: 1, // Fluid width
                       }}
                     >
                       {session.title}
@@ -435,6 +439,7 @@ const GroqChatbot: React.FC = () => {
                       className="delete-session-btn"
                       icon={<DeleteOutlined />}
                       onClick={(e) => e.stopPropagation()}
+                      style={{ flexShrink: 0, marginLeft: 8 }}
                     />
                   </Popconfirm>
                 </div>
@@ -473,7 +478,14 @@ const GroqChatbot: React.FC = () => {
 
       <Layout className="site-layout" style={{ height: "100%" }}>
         <Header className="chatbot-header">
-          <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 15,
+              overflow: "hidden",
+            }}
+          >
             <Button
               className="mobile-menu-btn"
               type="text"

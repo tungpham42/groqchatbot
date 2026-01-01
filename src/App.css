@@ -123,6 +123,7 @@ body {
   font-weight: 700;
   font-size: 18px;
   color: var(--primary-color);
+  white-space: nowrap; /* Prevent title breaking */
 }
 
 /* CONTENT */
@@ -153,6 +154,7 @@ body {
   display: flex;
   margin-bottom: 24px;
   animation: fadeIn 0.3s ease;
+  width: 100%; /* Ensure row takes full width */
 }
 .message-row.user {
   justify-content: flex-end;
@@ -165,6 +167,11 @@ body {
   font-family: var(--font-main);
   font-size: 15px;
   line-height: 1.6;
+  /* CRITICAL FIXES FOR TEXT OVERFLOW */
+  word-wrap: break-word;
+  overflow-wrap: break-word; /* Prevents long words/links from breaking layout */
+  word-break: break-word;
+  min-width: 0; /* Helps flex children shrink properly */
 }
 .message-row.user .message-card {
   background: var(--primary-gradient) !important;
@@ -183,11 +190,13 @@ body {
   background: #e8f5e9;
   color: #3a7d44;
   border: 1px solid #c8e6c9;
+  flex-shrink: 0; /* Prevent avatar from squishing */
 }
 .avatar-user {
   margin-left: 12px;
   background: #3a7d44;
   color: #fff;
+  flex-shrink: 0; /* Prevent avatar from squishing */
 }
 
 /* FOOTER */
@@ -226,6 +235,7 @@ body {
   justify-content: center;
   background: var(--primary-gradient) !important;
   border: none !important;
+  flex-shrink: 0;
 }
 .mic-btn {
   color: #3a7d44 !important;
@@ -283,11 +293,17 @@ body {
 }
 
 /* MARKDOWN */
+.markdown-body {
+  /* Ensure markdown content doesn't overflow the card */
+  overflow-x: auto;
+  max-width: 100%;
+}
 .markdown-body code {
   background: #f0f5f1;
   color: #2f5938;
   padding: 2px 6px;
   border-radius: 4px;
+  word-break: break-word; /* Allow code within sentences to break */
 }
 .message-row.user .markdown-body code {
   background: rgba(255, 255, 255, 0.2);
@@ -299,6 +315,19 @@ body {
   border-radius: 8px;
   border: 1px solid #e0e8e1;
   overflow-x: auto;
+  max-width: 100%; /* Prevent code block from pushing layout width */
+}
+/* Prevent images/tables from breaking layout */
+.markdown-body img,
+.markdown-body video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.markdown-body table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 /* --- RESPONSIVE --- */
