@@ -1,0 +1,249 @@
+/* Import Font 'Be Vietnam Pro' - Tối ưu tuyệt đối cho tiếng Việt */
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap");
+
+:root {
+  /* Bảng màu: Tre Việt, Gốm sứ & Giấy Dó */
+  --primary-color: #3a7d44; /* Xanh Tre (Bamboo Green) */
+  --primary-gradient: linear-gradient(135deg, #3a7d44 0%, #184e29 100%);
+
+  --bg-color: #f9f7f2; /* Màu kem giấy dó (Rice Paper) */
+
+  --chat-bg-user: #3a7d44; /* Xanh Tre trầm mặc */
+  --chat-bg-ai: #ffffff;
+
+  --text-primary: #2c362b; /* Đen pha xanh rêu (Soft Black) */
+  --text-secondary: #748b75; /* Xám rêu */
+  --accent-gold: #d4a017; /* Vàng Lúa (Harvest Gold) */
+
+  --font-main: "Be Vietnam Pro", sans-serif;
+  --shadow-soft: 0 8px 30px -5px rgba(58, 125, 68, 0.15);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main) !important;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  /* Họa tiết nền gợi nhớ vân giấy hoặc sương sớm */
+  background-image: radial-gradient(
+      circle at 10% 20%,
+      rgba(212, 160, 23, 0.08) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(58, 125, 68, 0.1) 0%,
+      transparent 40%
+    );
+  background-attachment: fixed;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --- Bố cục chính --- */
+.chatbot-container {
+  height: 100vh;
+  max-width: 900px;
+  margin: 0 auto;
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header: Thanh tao & Nhẹ nhàng */
+.chatbot-header {
+  background: rgba(249, 247, 242, 0.85) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(58, 125, 68, 0.1);
+  padding: 0 32px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.header-title {
+  font-family: var(--font-main);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--primary-color);
+  letter-spacing: -0.2px;
+  text-transform: uppercase; /* Chữ in hoa trang trọng */
+}
+
+/* Vùng Chat */
+.chatbot-content {
+  padding: 30px 32px 0 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Tùy biến thanh cuộn thanh mảnh */
+.chatbot-content::-webkit-scrollbar {
+  width: 6px;
+}
+.chatbot-content::-webkit-scrollbar-thumb {
+  background-color: rgba(58, 125, 68, 0.2);
+  border-radius: 10px;
+}
+
+/* Tin nhắn */
+.message-row {
+  display: flex;
+  margin-bottom: 24px;
+  animation: fadeIn 0.5s ease;
+}
+
+.message-row.user {
+  justify-content: flex-end;
+}
+
+.message-card {
+  max-width: 80%;
+  border: none !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04) !important;
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Bong bóng User (Xanh Tre) */
+.message-row.user .message-card {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  border-bottom-right-radius: 2px !important; /* Điểm nhấn góc cạnh nhỏ */
+}
+
+/* Bong bóng AI (Trắng Gốm) */
+.message-row.ai .message-card {
+  background: var(--chat-bg-ai) !important;
+  color: var(--text-primary) !important;
+  border-bottom-left-radius: 2px !important;
+  border: 1px solid rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Khu vực nhập liệu (Chân trang) */
+.chatbot-footer {
+  background: transparent !important;
+  padding: 20px 32px 32px 32px;
+}
+
+.input-container {
+  background: #ffffff;
+  padding: 8px 10px 8px 24px;
+  border-radius: 40px; /* Bo tròn hoàn toàn */
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(58, 125, 68, 0.15);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.input-container:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 12px 28px -8px rgba(58, 125, 68, 0.25);
+  transform: translateY(-2px);
+}
+
+.custom-textarea {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  resize: none !important;
+  padding: 12px 0 !important;
+  font-family: var(--font-main) !important;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.custom-textarea::placeholder {
+  color: #a3b1a5;
+  font-style: italic;
+}
+
+.send-btn {
+  border-radius: 50% !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(58, 125, 68, 0.3);
+  transition: transform 0.2s;
+}
+
+.send-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Markdown Styles */
+.markdown-body code {
+  background: #f0f5f1; /* Xanh rất nhạt */
+  color: #2f5938;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "Be Vietnam Pro", monospace;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.message-row.user .markdown-body code {
+  background: rgba(255, 255, 255, 0.2);
+  color: #e8f5e9;
+}
+
+.markdown-body pre {
+  background: #f5f7f5 !important;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e0e8e1;
+  color: #333;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Avatar: Khung viền thanh mảnh */
+.ant-avatar {
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(58, 125, 68, 0.1);
+}
+
+/* Hiệu ứng nhấp nháy cho Micro */
+@keyframes pulseRed {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pulsing-mic {
+  display: inline-block;
+  color: #d4380d; /* Màu đỏ cam */
+  margin-right: 8px;
+  animation: pulseRed 1.5s infinite ease-in-out;
+  font-size: 14px;
+}
