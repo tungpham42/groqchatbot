@@ -69,7 +69,8 @@ const GoogleAd: React.FC = () => {
         marginTop: 10,
         textAlign: "center",
         overflow: "hidden",
-        minHeight: "100px", // Reserve space to prevent layout shift
+        minHeight: "20px", // Reserve space to prevent layout shift
+        maxHeight: "50px", // Reserve space to prevent layout shift
       }}
     >
       {/* CHAT_res */}
