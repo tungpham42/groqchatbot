@@ -321,4 +321,14 @@ body {
   .delete-session-btn {
     opacity: 1 !important; /* Luôn hiện nút xóa trên mobile */
   }
+  .desktop-sider {
+    display: none !important;
+  }
+  /* Ẩn phần tử có class này trên mobile */
+  .desktop-only-item {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
 }

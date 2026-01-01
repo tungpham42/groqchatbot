@@ -11,6 +11,8 @@ import {
   Popconfirm,
   Menu,
   Drawer,
+  Tag,
+  Tooltip,
 } from "antd";
 import {
   SendOutlined,
@@ -26,6 +28,8 @@ import {
   MessageOutlined,
   MenuOutlined,
   InboxOutlined,
+  ThunderboltFilled,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
 
@@ -65,7 +69,6 @@ const GroqChatbot: React.FC = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // LOGIC 1: Lọc bỏ các session trống (chỉ có system message) ngay khi load
         return parsed.filter((s: ChatSession) => s.messages.length > 1);
       }
       return [];
@@ -79,6 +82,9 @@ const GroqChatbot: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
+
+  // State hiển thị Model (Mặc định là Ready)
+  const [usedModel, setUsedModel] = useState<string>("Ready");
 
   // --- REFS ---
   const recognitionRef = useRef<any>(null);
@@ -98,12 +104,7 @@ const GroqChatbot: React.FC = () => {
 
   // --- EFFECTS ---
   useEffect(() => {
-    // Chỉ lưu các session có nội dung thực tế (length > 1) vào localStorage
-    // Điều này giúp dọn dẹp rác khi F5
     const validSessions = sessions.filter((s) => s.messages.length > 1);
-
-    // Tuy nhiên, ta vẫn cần lưu session hiện tại vào state để UI không bị mất
-    // nên ở đây ta chỉ lọc khi save xuống disk, hoặc save tất cả nhưng lọc khi load (như LOGIC 1)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(validSessions));
   }, [sessions]);
 
@@ -111,10 +112,8 @@ const GroqChatbot: React.FC = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentMessages, isListening]);
 
-  // Khởi tạo session đầu tiên nếu chưa có
   useEffect(() => {
     if (sessions.length === 0 && !currentSessionId) {
-      // Tạo session mới nhưng không thông báo
       const newId = generateId();
       const newSession: ChatSession = {
         id: newId,
@@ -132,21 +131,15 @@ const GroqChatbot: React.FC = () => {
 
   // --- ACTIONS ---
 
-  // 1. Tạo đoạn chat mới (LOGIC 2: Tự động dọn dẹp)
   const handleNewChat = () => {
-    // Kiểm tra xem session hiện tại có đang trống không
     const currentS = sessions.find((s) => s.id === currentSessionId);
-
-    // Nếu session hiện tại chỉ có 1 tin nhắn (system), tái sử dụng nó
     if (currentS && currentS.messages.length <= 1) {
       setDrawerVisible(false);
       message.info("Đoạn chat hiện tại đã sẵn sàng");
       return;
     }
 
-    // Nếu không, lọc bỏ bất kỳ session rác nào khác trước khi tạo mới
     const cleanSessions = sessions.filter((s) => s.messages.length > 1);
-
     const newSession: ChatSession = {
       id: generateId(),
       title: "Đoạn chat mới",
@@ -156,24 +149,20 @@ const GroqChatbot: React.FC = () => {
 
     setSessions([newSession, ...cleanSessions]);
     setCurrentSessionId(newSession.id);
+    setUsedModel("Ready"); // Reset model display khi tạo chat mới
     setDrawerVisible(false);
     if (window.innerWidth < 768) message.success("Đã tạo đoạn chat mới");
   };
 
-  // 2. Chọn đoạn chat từ lịch sử (LOGIC 3: Xóa session cũ nếu trống)
   const handleSelectSession = (targetId: string) => {
-    // Trước khi chuyển, lọc danh sách để loại bỏ các session trống (trừ cái đích đến)
-    // Điều này đảm bảo khi rời khỏi một session trống, nó sẽ biến mất
     const cleanSessions = sessions.filter(
       (s) => s.id === targetId || s.messages.length > 1
     );
-
     setSessions(cleanSessions);
     setCurrentSessionId(targetId);
     setDrawerVisible(false);
   };
 
-  // 3. Xóa một đoạn chat cụ thể
   const handleDeleteSession = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     const newSessions = sessions.filter((s) => s.id !== id);
@@ -183,7 +172,6 @@ const GroqChatbot: React.FC = () => {
       if (newSessions.length > 0) {
         setCurrentSessionId(newSessions[0].id);
       } else {
-        // Nếu xóa hết, tạo lại mới
         const newId = generateId();
         const newSession: ChatSession = {
           id: newId,
@@ -198,7 +186,6 @@ const GroqChatbot: React.FC = () => {
     message.success("Đã xóa đoạn chat");
   };
 
-  // 4. Gửi tin nhắn
   const handleSend = async (manualText?: string) => {
     const contentToSend =
       typeof manualText === "string" ? manualText : inputValue;
@@ -254,6 +241,11 @@ const GroqChatbot: React.FC = () => {
 
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
+
+      // Cập nhật usedModel từ response
+      if (data.usedModel) {
+        setUsedModel(data.usedModel);
+      }
 
       setSessions((prev) =>
         prev.map((s) => {
@@ -354,7 +346,6 @@ const GroqChatbot: React.FC = () => {
 
       <div style={{ flex: 1, overflowY: "auto", padding: "0 10px" }}>
         <div className="history-label">Gần đây</div>
-        {/* Chỉ hiển thị các session có nội dung hoặc là session hiện tại */}
         <Menu
           mode="inline"
           selectedKeys={[currentSessionId || ""]}
@@ -450,6 +441,7 @@ const GroqChatbot: React.FC = () => {
 
       <Layout className="site-layout">
         <Header className="chatbot-header">
+          {/* Nút Menu & Tiêu đề */}
           <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
             <Button
               className="mobile-menu-btn"
@@ -462,6 +454,33 @@ const GroqChatbot: React.FC = () => {
               <GlobalOutlined style={{ fontSize: 20 }} />
             </div>
             <div className="header-title">Trợ Lý Việt</div>
+          </div>
+
+          {/* === HIỂN THỊ MODEL GÓC PHẢI (ẨN TRÊN MOBILE) === */}
+          <div className="desktop-only-item">
+            <Tooltip title={`Model: ${usedModel}`}>
+              <Tag
+                icon={
+                  usedModel === "Ready" ? (
+                    <CheckCircleOutlined />
+                  ) : (
+                    <ThunderboltFilled />
+                  )
+                }
+                color={usedModel === "Ready" ? "default" : "success"}
+                style={{
+                  margin: 0,
+                  padding: "4px 10px",
+                  borderRadius: 20,
+                  fontSize: 13,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
+                {usedModel === "Ready" ? "Sẵn sàng" : usedModel}
+              </Tag>
+            </Tooltip>
           </div>
         </Header>
 
