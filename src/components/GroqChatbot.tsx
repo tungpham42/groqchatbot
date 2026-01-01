@@ -32,8 +32,8 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw"; // [MỚI] Hỗ trợ render HTML
-import remarkGfm from "remark-gfm"; // [MỚI] Hỗ trợ Tables, GFM
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { TextArea } = Input;
@@ -84,8 +84,6 @@ const GroqChatbot: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
-
-  // State hiển thị Model (Mặc định là Ready)
   const [usedModel, setUsedModel] = useState<string>("Ready");
 
   // --- REFS ---
@@ -105,6 +103,23 @@ const GroqChatbot: React.FC = () => {
   );
 
   // --- EFFECTS ---
+
+  // 1. Google AdSense Auto Ads Script
+  // We only inject the script. Google handles Anchor/Vignette ads automatically.
+  // We do NOT use a manual <ins> unit or .push({}) here.
+  useEffect(() => {
+    const scriptId = "google-adsense-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src =
+        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3585118770961536";
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      document.body.appendChild(script);
+    }
+  }, []);
+
   useEffect(() => {
     const validSessions = sessions.filter((s) => s.messages.length > 1);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(validSessions));
@@ -128,11 +143,9 @@ const GroqChatbot: React.FC = () => {
     } else if (sessions.length > 0 && !currentSessionId) {
       setCurrentSessionId(sessions[0].id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessions, currentSessionId, INITIAL_SYSTEM_MSG]);
 
   // --- ACTIONS ---
-
   const handleNewChat = () => {
     const currentS = sessions.find((s) => s.id === currentSessionId);
     if (currentS && currentS.messages.length <= 1) {
@@ -151,7 +164,7 @@ const GroqChatbot: React.FC = () => {
 
     setSessions([newSession, ...cleanSessions]);
     setCurrentSessionId(newSession.id);
-    setUsedModel("Ready"); // Reset model display khi tạo chat mới
+    setUsedModel("Ready");
     setDrawerVisible(false);
     if (window.innerWidth < 768) message.success("Đã tạo đoạn chat mới");
   };
@@ -244,7 +257,6 @@ const GroqChatbot: React.FC = () => {
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
 
-      // Cập nhật usedModel từ response
       if (data.usedModel) {
         setUsedModel(data.usedModel);
       }
@@ -330,7 +342,6 @@ const GroqChatbot: React.FC = () => {
     recognition.start();
   };
 
-  // --- RENDER SIDEBAR CONTENT ---
   const SidebarContent = () => (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ padding: "20px" }}>
@@ -345,7 +356,6 @@ const GroqChatbot: React.FC = () => {
           Đoạn chat mới
         </Button>
       </div>
-
       <div style={{ flex: 1, overflowY: "auto", padding: "0 10px" }}>
         <div className="history-label">Gần đây</div>
         <Menu
@@ -395,7 +405,6 @@ const GroqChatbot: React.FC = () => {
                       {session.title}
                     </span>
                   </div>
-
                   <Popconfirm
                     title="Xóa đoạn này?"
                     onConfirm={(e: any) => handleDeleteSession(e, session.id)}
@@ -419,7 +428,10 @@ const GroqChatbot: React.FC = () => {
   );
 
   return (
-    <Layout style={{ height: "100vh" }}>
+    // FIX: Use 100dvh (Dynamic Viewport Height) instead of 100vh.
+    // This allows the layout to adapt if Google's Anchor Ad adds padding to the body
+    // or if the mobile URL bar appears/disappears, preventing the "locked scroll" bug.
+    <Layout style={{ height: "100dvh", overflow: "hidden" }}>
       <Sider
         width={280}
         className="desktop-sider"
@@ -441,9 +453,8 @@ const GroqChatbot: React.FC = () => {
         <SidebarContent />
       </Drawer>
 
-      <Layout className="site-layout">
+      <Layout className="site-layout" style={{ height: "100%" }}>
         <Header className="chatbot-header">
-          {/* Nút Menu & Tiêu đề */}
           <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
             <Button
               className="mobile-menu-btn"
@@ -451,14 +462,11 @@ const GroqChatbot: React.FC = () => {
               icon={<MenuOutlined />}
               onClick={() => setDrawerVisible(true)}
             />
-
             <div className="logo-circle">
               <GlobalOutlined style={{ fontSize: 20 }} />
             </div>
             <div className="header-title">Trợ Lý Việt</div>
           </div>
-
-          {/* === HIỂN THỊ MODEL GÓC PHẢI (ẨN TRÊN MOBILE) === */}
           <div className="desktop-only-item">
             <Tooltip title={`Model: ${usedModel}`}>
               <Tag
@@ -486,7 +494,8 @@ const GroqChatbot: React.FC = () => {
           </div>
         </Header>
 
-        <Content className="chatbot-content">
+        {/* Content handles its own scrolling independently of the body/ad */}
+        <Content className="chatbot-content" style={{ overflowY: "auto" }}>
           {currentMessages.length === 1 && (
             <div className="welcome-screen">
               <div className="welcome-icon">
@@ -569,7 +578,7 @@ const GroqChatbot: React.FC = () => {
           <div ref={bottomRef} />
         </Content>
 
-        <Footer className="chatbot-footer">
+        <Footer className="chatbot-footer" style={{ height: "auto" }}>
           <div className="input-container">
             <Button
               type="text"
@@ -614,6 +623,7 @@ const GroqChatbot: React.FC = () => {
               }
             />
           </div>
+          {/* No manual Ad block here anymore */}
         </Footer>
       </Layout>
     </Layout>
