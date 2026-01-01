@@ -25,6 +25,7 @@ import {
   PlusOutlined,
   MessageOutlined,
   MenuOutlined,
+  InboxOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
 
@@ -476,6 +477,16 @@ const GroqChatbot: React.FC = () => {
           )}
 
           <List
+            locale={{
+              emptyText: (
+                <div style={{ padding: "20px 0", color: "#A3B1A5" }}>
+                  <InboxOutlined style={{ fontSize: 24, marginBottom: 8 }} />
+                  <div style={{ fontFamily: "Be Vietnam Pro", fontSize: 12 }}>
+                    Chưa có gì! Hãy bắt đầu bằng cách gửi tin nhắn.
+                  </div>
+                </div>
+              ),
+            }}
             dataSource={currentMessages.filter((m) => m.role !== "system")}
             split={false}
             renderItem={(item) => (
