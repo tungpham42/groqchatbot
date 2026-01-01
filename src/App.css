@@ -1,20 +1,14 @@
-/* Import Font 'Be Vietnam Pro' - Tối ưu tuyệt đối cho tiếng Việt */
+/* Import Font 'Be Vietnam Pro' */
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap");
 
 :root {
-  /* Bảng màu: Tre Việt, Gốm sứ & Giấy Dó */
-  --primary-color: #3a7d44; /* Xanh Tre (Bamboo Green) */
+  --primary-color: #3a7d44; /* Xanh Tre */
   --primary-gradient: linear-gradient(135deg, #3a7d44 0%, #184e29 100%);
-
-  --bg-color: #f9f7f2; /* Màu kem giấy dó (Rice Paper) */
-
-  --chat-bg-user: #3a7d44; /* Xanh Tre trầm mặc */
+  --bg-color: #f9f7f2;
+  --sider-bg: #f2efe9; /* Màu nền cột trái */
+  --chat-bg-user: #3a7d44;
   --chat-bg-ai: #ffffff;
-
-  --text-primary: #2c362b; /* Đen pha xanh rêu (Soft Black) */
-  --text-secondary: #748b75; /* Xám rêu */
-  --accent-gold: #d4a017; /* Vàng Lúa (Harvest Gold) */
-
+  --text-primary: #2c362b;
   --font-main: "Be Vietnam Pro", sans-serif;
   --shadow-soft: 0 8px 30px -5px rgba(58, 125, 68, 0.15);
 }
@@ -25,7 +19,64 @@ body {
   font-family: var(--font-main) !important;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  /* Họa tiết nền gợi nhớ vân giấy hoặc sương sớm */
+  overflow: hidden;
+}
+
+/* --- SIDEBAR (CỘT TRÁI) --- */
+.desktop-sider {
+  background: var(--sider-bg) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.new-chat-btn {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(58, 125, 68, 0.2);
+}
+.new-chat-btn:hover {
+  background: #2f6a38 !important;
+}
+
+.history-label {
+  padding: 10px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8c9b90;
+  text-transform: uppercase;
+}
+
+/* Item trong lịch sử */
+.ant-menu-item-selected {
+  background-color: #e0e8e2 !important; /* Màu nền khi đang chọn */
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+.ant-menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+.ant-menu-item:after {
+  border-right: none !important; /* Xóa vạch xanh mặc định của Antd */
+}
+
+/* Nút xóa session (ẩn đi, hiện khi hover) */
+.delete-session-btn {
+  color: #999;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ant-menu-item:hover .delete-session-btn {
+  opacity: 1;
+}
+.delete-session-btn:hover {
+  color: #ff4d4f !important;
+  background: rgba(255, 77, 79, 0.1);
+}
+
+/* --- MAIN LAYOUT --- */
+.site-layout {
+  background: var(--bg-color) !important;
   background-image: radial-gradient(
       circle at 10% 20%,
       rgba(212, 160, 23, 0.08) 0%,
@@ -36,195 +87,180 @@ body {
       rgba(58, 125, 68, 0.1) 0%,
       transparent 40%
     );
-  background-attachment: fixed;
-  height: 100vh;
-  overflow: hidden;
 }
 
-/* --- Bố cục chính --- */
-.chatbot-container {
-  height: 100vh;
-  max-width: 900px;
-  margin: 0 auto;
-  background: transparent !important;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header: Thanh tao & Nhẹ nhàng */
+/* HEADER */
 .chatbot-header {
   background: rgba(249, 247, 242, 0.85) !important;
   backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(58, 125, 68, 0.1);
-  padding: 0 32px;
-  height: 80px;
+  padding: 0 24px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 10;
+}
+
+.mobile-menu-btn {
+  display: none !important; /* Mặc định ẩn trên Desktop */
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.logo-circle {
+  background: rgba(58, 125, 68, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3a7d44;
 }
 
 .header-title {
   font-family: var(--font-main);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 18px;
   color: var(--primary-color);
-  letter-spacing: -0.2px;
-  text-transform: uppercase; /* Chữ in hoa trang trọng */
 }
 
-/* Vùng Chat */
+/* CONTENT */
 .chatbot-content {
-  padding: 30px 32px 0 32px;
+  padding: 20px 24px 0 24px;
   overflow-y: auto;
   flex: 1;
 }
 
-/* Tùy biến thanh cuộn thanh mảnh */
-.chatbot-content::-webkit-scrollbar {
-  width: 6px;
+.welcome-screen {
+  text-align: center;
+  margin-top: 20vh;
+  opacity: 0.7;
 }
-.chatbot-content::-webkit-scrollbar-thumb {
-  background-color: rgba(58, 125, 68, 0.2);
-  border-radius: 10px;
+.welcome-icon {
+  background: #e8f5e9;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Tin nhắn */
+/* MESSAGES */
 .message-row {
   display: flex;
   margin-bottom: 24px;
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.3s ease;
 }
-
 .message-row.user {
   justify-content: flex-end;
 }
-
 .message-card {
-  max-width: 80%;
+  max-width: 85%;
   border: none !important;
   border-radius: 18px !important;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   font-family: var(--font-main);
   font-size: 15px;
   line-height: 1.6;
 }
-
-/* Bong bóng User (Xanh Tre) */
 .message-row.user .message-card {
   background: var(--primary-gradient) !important;
   color: white !important;
-  border-bottom-right-radius: 2px !important; /* Điểm nhấn góc cạnh nhỏ */
+  border-bottom-right-radius: 2px !important;
 }
-
-/* Bong bóng AI (Trắng Gốm) */
 .message-row.ai .message-card {
   background: var(--chat-bg-ai) !important;
   color: var(--text-primary) !important;
   border-bottom-left-radius: 2px !important;
-  border: 1px solid rgba(0, 0, 0, 0.03) !important;
 }
 
-/* Khu vực nhập liệu (Chân trang) */
+/* AVATARS */
+.avatar-ai {
+  margin-right: 12px;
+  background: #e8f5e9;
+  color: #3a7d44;
+  border: 1px solid #c8e6c9;
+}
+.avatar-user {
+  margin-left: 12px;
+  background: #3a7d44;
+  color: #fff;
+}
+
+/* FOOTER */
 .chatbot-footer {
   background: transparent !important;
-  padding: 20px 32px 32px 32px;
+  padding: 16px 24px 24px 24px;
 }
-
 .input-container {
   background: #ffffff;
-  padding: 8px 10px 8px 24px;
-  border-radius: 40px; /* Bo tròn hoàn toàn */
+  padding: 6px 8px 6px 8px;
+  border-radius: 30px;
   box-shadow: var(--shadow-soft);
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   border: 1px solid rgba(58, 125, 68, 0.15);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-
 .input-container:focus-within {
   border-color: var(--primary-color);
-  box-shadow: 0 12px 28px -8px rgba(58, 125, 68, 0.25);
-  transform: translateY(-2px);
 }
-
 .custom-textarea {
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
   resize: none !important;
-  padding: 12px 0 !important;
+  padding: 8px 0 !important;
   font-family: var(--font-main) !important;
   font-size: 15px;
-  color: var(--text-primary);
 }
-
-.custom-textarea::placeholder {
-  color: #a3b1a5;
-  font-style: italic;
-}
-
 .send-btn {
   border-radius: 50% !important;
-  width: 48px !important;
-  height: 48px !important;
+  width: 40px !important;
+  height: 40px !important;
   display: flex !important;
   align-items: center;
   justify-content: center;
   background: var(--primary-gradient) !important;
   border: none !important;
-  box-shadow: 0 4px 12px rgba(58, 125, 68, 0.3);
-  transition: transform 0.2s;
+}
+.mic-btn {
+  color: #3a7d44 !important;
+  border: none !important;
+}
+.mic-btn-active {
+  color: #ff4d4f !important;
+  background: #fff1f0 !important;
+  border: 1px solid #ff4d4f !important;
 }
 
-.send-btn:hover {
-  transform: scale(1.05);
+/* ANIMATIONS & EXTRAS */
+.listening-indicator {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #d4380d;
+  font-size: 13px;
 }
-
-/* Markdown Styles */
-.markdown-body code {
-  background: #f0f5f1; /* Xanh rất nhạt */
-  color: #2f5938;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: "Be Vietnam Pro", monospace;
-  font-weight: 600;
-  font-size: 0.9em;
+.loading-indicator {
+  margin-left: 60px;
+  margin-bottom: 20px;
+  color: #748b75;
+  font-style: italic;
+  font-size: 13px;
 }
-
-.message-row.user .markdown-body code {
-  background: rgba(255, 255, 255, 0.2);
-  color: #e8f5e9;
-}
-
-.markdown-body pre {
-  background: #f5f7f5 !important;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e0e8e1;
-  color: #333;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(5px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-/* Avatar: Khung viền thanh mảnh */
-.ant-avatar {
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(58, 125, 68, 0.1);
-}
-
-/* Hiệu ứng nhấp nháy cho Micro */
 @keyframes pulseRed {
   0% {
     transform: scale(1);
@@ -239,23 +275,50 @@ body {
     opacity: 1;
   }
 }
-
 .pulsing-mic {
   display: inline-block;
-  color: #d4380d; /* Màu đỏ cam */
-  margin-right: 8px;
+  color: #d4380d;
+  margin-right: 6px;
   animation: pulseRed 1.5s infinite ease-in-out;
-  font-size: 14px;
 }
 
-/* --- RESPONSIVE: Ẩn chữ trên mobile --- */
-@media (max-width: 768px) {
-  .mobile-hidden {
-    display: none !important;
-  }
+/* MARKDOWN */
+.markdown-body code {
+  background: #f0f5f1;
+  color: #2f5938;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.message-row.user .markdown-body code {
+  background: rgba(255, 255, 255, 0.2);
+  color: #e8f5e9;
+}
+.markdown-body pre {
+  background: #f5f7f5 !important;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e8e1;
+  overflow-x: auto;
+}
 
-  /* Tinh chỉnh header trên mobile cho gọn */
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .desktop-sider {
+    display: none !important; /* Ẩn sidebar cứng trên mobile */
+  }
+  .mobile-menu-btn {
+    display: block !important; /* Hiện nút mở menu */
+  }
   .chatbot-header {
-    padding: 0 15px !important;
+    padding: 0 16px !important;
+  }
+  .chatbot-content {
+    padding: 10px 16px 0 16px;
+  }
+  .chatbot-footer {
+    padding: 10px 16px 16px 16px;
+  }
+  .delete-session-btn {
+    opacity: 1 !important; /* Luôn hiện nút xóa trên mobile */
   }
 }
