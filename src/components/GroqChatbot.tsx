@@ -32,6 +32,8 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw"; // [MỚI] Hỗ trợ render HTML
+import remarkGfm from "remark-gfm"; // [MỚI] Hỗ trợ Tables, GFM
 
 const { Header, Content, Footer, Sider } = Layout;
 const { TextArea } = Input;
@@ -524,7 +526,12 @@ const GroqChatbot: React.FC = () => {
                 <Card className="message-card">
                   <div className="markdown-body">
                     {item.role === "assistant" ? (
-                      <ReactMarkdown>{item.content}</ReactMarkdown>
+                      <ReactMarkdown
+                        rehypePlugins={[rehypeRaw]}
+                        remarkPlugins={[remarkGfm]}
+                      >
+                        {item.content}
+                      </ReactMarkdown>
                     ) : (
                       <span>{item.content}</span>
                     )}

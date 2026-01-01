@@ -8,6 +8,9 @@ const groq = new Groq({
 
 // Danh sách Model theo thứ tự ưu tiên (Chiến thuật Fallback)
 const MODELS = [
+  "openai/gpt-oss-120b", // Model chính
+  "qwen/qwen3-32b", // Model phụ
+  "openai/gpt-oss-20b", // Model dự phòng
   "llama-3.3-70b-versatile", // Model thông minh nhất
   "llama-3.1-8b-instant", // Model nhanh nhất
   "mixtral-8x7b-32768", // Model dự phòng
