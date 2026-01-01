@@ -32,8 +32,8 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
-import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw"; // [MỚI] Hỗ trợ render HTML
+import remarkGfm from "remark-gfm"; // [MỚI] Hỗ trợ Tables, GFM
 
 const { Header, Content, Footer, Sider } = Layout;
 const { TextArea } = Input;
@@ -49,41 +49,6 @@ type ChatSession = {
   title: string;
   messages: Message[];
   lastUpdated: number;
-};
-
-// --- GOOGLE ADSENSE COMPONENT ---
-const GoogleAd: React.FC = () => {
-  useEffect(() => {
-    try {
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push(
-        {}
-      );
-    } catch (e) {
-      console.error("AdSense Error:", e);
-    }
-  }, []);
-
-  return (
-    <div
-      style={{
-        marginTop: 10,
-        textAlign: "center",
-        overflow: "hidden",
-        minHeight: "20px", // Reserve space to prevent layout shift
-        maxHeight: "50px", // Reserve space to prevent layout shift
-      }}
-    >
-      {/* CHAT_res */}
-      <ins
-        className="adsbygoogle"
-        style={{ display: "block" }}
-        data-ad-client="ca-pub-3585118770961536"
-        data-ad-slot="8229616797"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      ></ins>
-    </div>
-  );
 };
 
 const GroqChatbot: React.FC = () => {
@@ -140,21 +105,6 @@ const GroqChatbot: React.FC = () => {
   );
 
   // --- EFFECTS ---
-
-  // 1. Load AdSense Script Globally
-  useEffect(() => {
-    const scriptId = "google-adsense-script";
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src =
-        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3585118770961536";
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      document.body.appendChild(script);
-    }
-  }, []);
-
   useEffect(() => {
     const validSessions = sessions.filter((s) => s.messages.length > 1);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(validSessions));
@@ -619,7 +569,7 @@ const GroqChatbot: React.FC = () => {
           <div ref={bottomRef} />
         </Content>
 
-        <Footer className="chatbot-footer" style={{ height: "auto" }}>
+        <Footer className="chatbot-footer">
           <div className="input-container">
             <Button
               type="text"
@@ -664,9 +614,6 @@ const GroqChatbot: React.FC = () => {
               }
             />
           </div>
-
-          {/* === ADSENSE BLOCK === */}
-          <GoogleAd />
         </Footer>
       </Layout>
     </Layout>
