@@ -90,9 +90,18 @@ const GroqChatbot: React.FC = () => {
   const recognitionRef = useRef<any>(null);
   const silenceTimer = useRef<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<any>(null);
 
   // --- HELPERS ---
   const generateId = () => Math.random().toString(36).substr(2, 9);
+
+  const focusInput = () => {
+    setTimeout(() => {
+      inputRef.current?.focus({
+        cursor: "end", // Đặt con trỏ ở cuối văn bản (nếu có)
+      });
+    }, 100); // Delay nhẹ để đảm bảo UI đã render xong trạng thái disabled=false
+  };
 
   const currentMessages = useMemo(
     () =>
@@ -103,6 +112,10 @@ const GroqChatbot: React.FC = () => {
   );
 
   // --- EFFECTS ---
+
+  useEffect(() => {
+    focusInput();
+  }, []);
 
   // 1. Google AdSense Auto Ads Script
   // We only inject the script. Google handles Anchor/Vignette ads automatically.
@@ -151,6 +164,7 @@ const GroqChatbot: React.FC = () => {
     if (currentS && currentS.messages.length <= 1) {
       setDrawerVisible(false);
       message.info("Đoạn chat hiện tại đã sẵn sàng");
+      focusInput();
       return;
     }
 
@@ -166,6 +180,7 @@ const GroqChatbot: React.FC = () => {
     setCurrentSessionId(newSession.id);
     setUsedModel("Ready");
     setDrawerVisible(false);
+    focusInput();
     if (window.innerWidth < 768) message.success("Đã tạo đoạn chat mới");
   };
 
@@ -176,6 +191,7 @@ const GroqChatbot: React.FC = () => {
     setSessions(cleanSessions);
     setCurrentSessionId(targetId);
     setDrawerVisible(false);
+    focusInput();
   };
 
   const handleDeleteSession = (e: React.MouseEvent, id: string) => {
@@ -199,6 +215,7 @@ const GroqChatbot: React.FC = () => {
       }
     }
     message.success("Đã xóa đoạn chat");
+    focusInput();
   };
 
   const handleSend = async (manualText?: string) => {
@@ -296,6 +313,7 @@ const GroqChatbot: React.FC = () => {
       );
     } finally {
       setLoading(false);
+      focusInput();
     }
   };
 
@@ -595,6 +613,7 @@ const GroqChatbot: React.FC = () => {
             />
             <TextArea
               value={inputValue}
+              ref={inputRef}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
