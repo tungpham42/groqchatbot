@@ -10,6 +10,7 @@ import {
   message,
   Tag,
   Tooltip,
+  Popconfirm, // <--- Thêm Popconfirm để xác nhận xóa
 } from "antd";
 import {
   SendOutlined,
@@ -20,8 +21,9 @@ import {
   HeartFilled,
   CommentOutlined,
   InboxOutlined,
-  AudioOutlined, // <--- Icon Micro
-  StopOutlined, // <--- Icon Dừng
+  AudioOutlined,
+  StopOutlined,
+  DeleteOutlined, // <--- Thêm Icon thùng rác
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
 
@@ -34,92 +36,57 @@ type Message = {
 };
 
 const GroqChatbot: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "system",
-      content:
-        "Bạn là một trợ lý ảo thông thái, lịch sự và sử dụng tiếng Việt tự nhiên, giàu cảm xúc. Hãy trả lời ngắn gọn, đi vào trọng tâm.",
-    },
-  ]);
+  // System prompt mặc định
+  const INITIAL_MESSAGE: Message = {
+    role: "system",
+    content:
+      "Bạn là một trợ lý ảo thông thái, lịch sự và sử dụng tiếng Việt tự nhiên, giàu cảm xúc. Hãy trả lời ngắn gọn, đi vào trọng tâm.",
+  };
+
+  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [usedModel, setUsedModel] = useState<string>("Ready");
 
   // --- STATE CHO GHI ÂM ---
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null); // Lưu instance của SpeechRecognition
+  const recognitionRef = useRef<any>(null);
+  const silenceTimer = useRef<any>(null);
+  const SILENCE_TIMEOUT = 2000;
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isListening]); // Scroll khi tin nhắn mới hoặc đang ghi âm
+  }, [messages, isListening]);
 
-  // --- HÀM XỬ LÝ GHI ÂM (SPEECH TO TEXT) ---
-  const toggleListening = () => {
-    if (isListening) {
-      // Nếu đang nghe thì dừng lại
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
-
-    // Kiểm tra trình duyệt có hỗ trợ không
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      message.error("Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "vi-VN"; // Cấu hình tiếng Việt
-    recognition.continuous = false; // Tự động dừng khi ngắt câu
-    recognition.interimResults = true; // Hiển thị kết quả tạm thời (real-time)
-
-    recognition.onstart = () => {
-      setIsListening(true);
+  useEffect(() => {
+    return () => {
+      if (silenceTimer.current) clearTimeout(silenceTimer.current);
     };
+  }, []);
 
-    recognition.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((result: any) => result[0])
-        .map((result) => result.transcript)
-        .join("");
-
-      // Cập nhật vào ô input ngay lập tức
-      setInputValue(transcript);
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error("Lỗi ghi âm:", event.error);
-      setIsListening(false);
-      if (event.error === "not-allowed") {
-        message.error("Vui lòng cấp quyền Micro để sử dụng.");
-      }
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
+  // --- HÀM XÓA CHAT ---
+  const handleClearChat = () => {
+    setMessages([INITIAL_MESSAGE]); // Reset về tin nhắn hệ thống ban đầu
+    setUsedModel("Ready");
+    message.success("Đã xóa lịch sử trò chuyện");
   };
-  // ------------------------------------------
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
+  // --- HÀM GỬI TIN NHẮN ---
+  const handleSend = async (manualText?: string) => {
+    const contentToSend =
+      typeof manualText === "string" ? manualText : inputValue;
 
-    // Tắt mic nếu đang bật khi gửi
+    if (!contentToSend.trim()) return;
+
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
+      if (silenceTimer.current) clearTimeout(silenceTimer.current);
     }
 
-    const newUserMsg: Message = { role: "user", content: inputValue };
+    const newUserMsg: Message = { role: "user", content: contentToSend };
     const newHistory = [...messages, newUserMsg];
 
     setMessages(newHistory);
@@ -163,6 +130,65 @@ const GroqChatbot: React.FC = () => {
     }
   };
 
+  // --- HÀM XỬ LÝ GHI ÂM ---
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      if (silenceTimer.current) clearTimeout(silenceTimer.current);
+      return;
+    }
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      message.error("Trình duyệt không hỗ trợ nhận dạng giọng nói.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "vi-VN";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result) => result.transcript)
+        .join("");
+
+      setInputValue(transcript);
+
+      if (silenceTimer.current) clearTimeout(silenceTimer.current);
+
+      silenceTimer.current = setTimeout(() => {
+        console.log("Phát hiện im lặng, tự động gửi...");
+        recognition.stop();
+        handleSend(transcript);
+      }, SILENCE_TIMEOUT);
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error === "not-allowed") {
+        message.error("Vui lòng cấp quyền Micro.");
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
   return (
     <Layout className="chatbot-container">
       {/* HEADER */}
@@ -183,25 +209,47 @@ const GroqChatbot: React.FC = () => {
             <GlobalOutlined style={{ fontSize: 20 }} />
           </div>
           <div>
-            <div className="header-title">Trợ Lý Ảo</div>
+            <div className="header-title">Trợ Lý Việt</div>
           </div>
         </div>
 
-        <Tooltip title={`Mô hình đang dùng: ${usedModel}`}>
-          <Tag
-            style={{
-              borderRadius: 20,
-              padding: "4px 12px",
-              border: "1px solid #C5E1A5",
-              background: "#F1F8E9",
-              color: "#33691E",
-              fontFamily: "Be Vietnam Pro",
-              fontWeight: 500,
-            }}
-          >
-            {usedModel === "Ready" ? "Sẵn sàng" : `⚡ ${usedModel}`}
-          </Tag>
-        </Tooltip>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* TAG MODEL */}
+          <Tooltip title={`Mô hình đang dùng: ${usedModel}`}>
+            <Tag
+              style={{
+                borderRadius: 20,
+                padding: "4px 12px",
+                border: "1px solid #C5E1A5",
+                background: "#F1F8E9",
+                color: "#33691E",
+                fontFamily: "Be Vietnam Pro",
+                fontWeight: 500,
+              }}
+            >
+              {usedModel === "Ready" ? "Sẵn sàng" : `⚡ ${usedModel}`}
+            </Tag>
+          </Tooltip>
+
+          {/* NÚT XÓA CHAT */}
+          {messages.length > 1 && (
+            <Popconfirm
+              title="Xóa lịch sử?"
+              description="Bạn có chắc muốn xóa toàn bộ đoạn chat này không?"
+              onConfirm={handleClearChat}
+              okText="Xóa"
+              cancelText="Hủy"
+              placement="bottomRight"
+            >
+              <Button
+                type="text"
+                icon={<DeleteOutlined />}
+                danger
+                style={{ borderRadius: "50%" }}
+              />
+            </Popconfirm>
+          )}
+        </div>
       </Header>
 
       {/* CONTENT */}
@@ -303,7 +351,6 @@ const GroqChatbot: React.FC = () => {
           )}
         />
 
-        {/* Hiển thị trạng thái đang nghe */}
         {isListening && (
           <div
             style={{
@@ -313,8 +360,8 @@ const GroqChatbot: React.FC = () => {
               animation: "fadeIn 0.3s",
             }}
           >
-            <span className="pulsing-mic">●</span> Đang lắng nghe giọng nói của
-            bạn...
+            <span className="pulsing-mic">●</span> Đang lắng nghe... (Tự gửi sau
+            2s im lặng)
           </div>
         )}
 
@@ -345,7 +392,6 @@ const GroqChatbot: React.FC = () => {
       {/* FOOTER INPUT */}
       <Footer className="chatbot-footer">
         <div className="input-container">
-          {/* NÚT MICRO MỚI */}
           <Button
             type="text"
             shape="circle"
@@ -371,17 +417,19 @@ const GroqChatbot: React.FC = () => {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSend();
+                handleSend(); // Gọi không tham số, nó sẽ dùng inputValue
               }
             }}
-            placeholder={isListening ? "Đang ghi âm..." : "Nhập tin nhắn..."}
+            placeholder={
+              isListening ? "Đang ghi âm..." : "Nhập tin nhắn tại đây..."
+            }
             autoSize={{ minRows: 1, maxRows: 4 }}
             className="custom-textarea"
             disabled={loading}
           />
           <Button
             type="primary"
-            onClick={handleSend}
+            onClick={() => handleSend()}
             loading={loading}
             className="send-btn"
             icon={
