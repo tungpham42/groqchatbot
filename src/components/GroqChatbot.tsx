@@ -213,25 +213,34 @@ const GroqChatbot: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* TAG MODEL */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {/* TAG MODEL: Chỉ hiện icon sấm sét trên mobile, ẩn tên model */}
           <Tooltip title={`Mô hình đang dùng: ${usedModel}`}>
             <Tag
               style={{
                 borderRadius: 20,
-                padding: "4px 12px",
+                padding: "4px 10px", // Giảm padding một chút
                 border: "1px solid #C5E1A5",
                 background: "#F1F8E9",
                 color: "#33691E",
                 fontFamily: "Be Vietnam Pro",
                 fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
               }}
             >
-              {usedModel === "Ready" ? "Sẵn sàng" : `⚡ ${usedModel}`}
+              {/* Luôn hiện dấu sấm sét hoặc chấm xanh */}
+              <span>{usedModel === "Ready" ? "●" : "⚡"}</span>
+
+              {/* Ẩn tên model trên mobile */}
+              <span className="mobile-hidden">
+                {usedModel === "Ready" ? " Sẵn sàng" : usedModel}
+              </span>
             </Tag>
           </Tooltip>
 
-          {/* NÚT XÓA CHAT */}
+          {/* NÚT XÓA CHAT: Chỉ hiện icon thùng rác trên mobile */}
           {messages.length > 1 && (
             <Popconfirm
               title="Xóa lịch sử?"
@@ -245,8 +254,11 @@ const GroqChatbot: React.FC = () => {
                 type="text"
                 icon={<DeleteOutlined />}
                 danger
-                style={{ borderRadius: "50%" }}
-              />
+                style={{ fontWeight: 500, padding: "4px 8px" }}
+              >
+                {/* Ẩn chữ "Xóa đoạn chat" trên mobile */}
+                <span className="mobile-hidden">Xóa đoạn chat</span>
+              </Button>
             </Popconfirm>
           )}
         </div>

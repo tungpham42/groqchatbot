@@ -247,3 +247,15 @@ body {
   animation: pulseRed 1.5s infinite ease-in-out;
   font-size: 14px;
 }
+
+/* --- RESPONSIVE: Ẩn chữ trên mobile --- */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  /* Tinh chỉnh header trên mobile cho gọn */
+  .chatbot-header {
+    padding: 0 15px !important;
+  }
+}
