@@ -16,6 +16,9 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 
 const { Header, Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -32,6 +35,72 @@ interface ChatLog {
 interface DashboardProps {
   onBack: () => void;
 }
+
+// Sub-component to handle Markdown rendering with Expand/Collapse toggle
+const MarkdownCell: React.FC<{ content: string }> = ({ content }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div>
+      <div
+        style={{
+          // If expanded, show all. If not, limit height to mimic "rows: 3"
+          maxHeight: expanded ? "none" : "64px",
+          overflow: "hidden",
+          position: "relative",
+          // Add a subtle mask if collapsed to indicate more content
+          maskImage: expanded
+            ? "none"
+            : "linear-gradient(to bottom, black 60%, transparent 100%)",
+          WebkitMaskImage: expanded
+            ? "none"
+            : "linear-gradient(to bottom, black 60%, transparent 100%)",
+        }}
+      >
+        <div
+          className="markdown-body"
+          style={{ fontSize: "13px", color: "#444" }}
+        >
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
+            remarkPlugins={[remarkGfm]}
+            components={{
+              // Override specific elements if needed to fit table style
+              p: ({ node, ...props }) => (
+                <p style={{ marginBottom: "8px" }} {...props} />
+              ),
+              pre: ({ node, ...props }) => (
+                <pre
+                  style={{
+                    background: "#f5f5f5",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    overflowX: "auto",
+                  }}
+                  {...props}
+                />
+              ),
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      </div>
+      <div style={{ marginTop: 4 }}>
+        <Button
+          type="link"
+          onClick={(e) => {
+            e.preventDefault();
+            setExpanded(!expanded);
+          }}
+          style={{ fontSize: 12 }}
+        >
+          {expanded ? "Thu gọn" : "Xem chi tiết"}
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
   const [logs, setLogs] = useState<ChatLog[]>([]);
@@ -108,24 +177,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
       title: "AI Trả lời",
       dataIndex: "ai_response",
       key: "ai_response",
-      width: 400,
-      render: (t: string) => (
-        <Paragraph
-          ellipsis={{
-            rows: 3,
-            expandable: true,
-            symbol: "Xem chi tiết",
-          }}
-          style={{
-            marginBottom: 0,
-            color: "#444",
-            whiteSpace: "pre-wrap",
-            fontSize: 13,
-          }}
-        >
-          {t}
-        </Paragraph>
-      ),
+      width: 500, // Increased width slightly for better Markdown readability
+      render: (t: string) => <MarkdownCell content={t} />,
     },
   ];
 
@@ -172,10 +225,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
       <Content
         style={{
           padding: "20px",
-          // Use flex column to fill height but don't hard-clip the bottom edge yet
           display: "flex",
           flexDirection: "column",
-          height: "calc(100vh - 64px)", // Explicit height minus header
+          height: "calc(100vh - 64px)",
         }}
       >
         <Card
@@ -184,14 +236,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             display: "flex",
             flexDirection: "column",
-            flex: 1, // Fill available space
-            overflow: "hidden", // Keep card rounded corners clean
+            flex: 1,
+            overflow: "hidden",
           }}
-          bodyStyle={{
-            padding: 24,
-            display: "flex",
-            flexDirection: "column",
-            height: "100%", // Fill the card
+          styles={{
+            body: {
+              padding: 24,
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+            },
           }}
         >
           <div style={{ flexShrink: 0, marginBottom: 16 }}>
@@ -212,14 +266,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
               loading={loading}
               pagination={{
                 pageSize: 20,
-                position: ["bottomCenter"], // Explicitly position at bottom
+                position: ["bottomCenter"],
                 showSizeChanger: false,
               }}
-              // Adjusted calculation:
-              // 100vh - Header(64) - CardPadding(48) - InputMB(16) - InputHeight(32) - Pagination(~60)
-              // ~220px offset + safety margin.
-              // 'max-content' or a slightly smaller calc ensures pagination is visible.
-              scroll={{ x: 1200, y: "calc(100vh - 300px)" }}
+              scroll={{ x: 1300, y: "calc(100vh - 300px)" }}
             />
           </div>
         </Card>
