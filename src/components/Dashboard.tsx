@@ -41,7 +41,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Ensure your env variable is correctly set
       const res = await fetch(
         `/api/get-logs?secret=${process.env.REACT_APP_DASHBOARD_PASSWORD}`
       );
@@ -120,7 +119,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
           style={{
             marginBottom: 0,
             color: "#444",
-            whiteSpace: "pre-wrap", // Preserves line breaks/formatting
+            whiteSpace: "pre-wrap",
             fontSize: 13,
           }}
         >
@@ -173,9 +172,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
       <Content
         style={{
           padding: "20px",
-          overflow: "hidden",
+          // Use flex column to fill height but don't hard-clip the bottom edge yet
           display: "flex",
           flexDirection: "column",
+          height: "calc(100vh - 64px)", // Explicit height minus header
         }}
       >
         <Card
@@ -184,14 +184,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             display: "flex",
             flexDirection: "column",
-            height: "100%",
-            overflow: "hidden",
+            flex: 1, // Fill available space
+            overflow: "hidden", // Keep card rounded corners clean
           }}
           bodyStyle={{
             padding: 24,
-            height: "100%",
             display: "flex",
             flexDirection: "column",
+            height: "100%", // Fill the card
           }}
         >
           <div style={{ flexShrink: 0, marginBottom: 16 }}>
@@ -204,16 +204,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
             />
           </div>
 
-          <div style={{ flex: 1, overflow: "hidden" }}>
+          <div style={{ flex: 1, minHeight: 0 }}>
             <Table
               rowKey="id"
               columns={columns}
               dataSource={filteredData}
               loading={loading}
-              pagination={{ pageSize: 20 }}
-              // x: 1200 ensures horizontal scroll appears if screen is small
-              // y: true / fixed height makes the header sticky and body scrollable
-              scroll={{ x: 1200, y: "calc(100vh - 280px)" }}
+              pagination={{
+                pageSize: 20,
+                position: ["bottomCenter"], // Explicitly position at bottom
+                showSizeChanger: false,
+              }}
+              // Adjusted calculation:
+              // 100vh - Header(64) - CardPadding(48) - InputMB(16) - InputHeight(32) - Pagination(~60)
+              // ~220px offset + safety margin.
+              // 'max-content' or a slightly smaller calc ensures pagination is visible.
+              scroll={{ x: 1200, y: "calc(100vh - 300px)" }}
             />
           </div>
         </Card>
