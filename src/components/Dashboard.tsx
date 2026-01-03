@@ -42,7 +42,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
     setLoading(true);
     try {
       // Gọi về Netlify Function kèm mật khẩu admin
-      const res = await fetch("/api/get-logs?secret=lopcd2");
+      const res = await fetch(
+        `/api/get-logs?secret=${process.env.REACT_APP_DASHBOARD_PASSWORD}`
+      );
       if (!res.ok) throw new Error("Lỗi xác thực hoặc server");
       const data = await res.json();
       setLogs(data);
