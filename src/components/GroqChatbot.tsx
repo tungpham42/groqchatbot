@@ -95,12 +95,33 @@ const GroqChatbot: React.FC = () => {
   // --- HELPERS ---
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
+  // === HÀM LƯU LOG MỚI ===
+  const saveChatLog = async (
+    sessionId: string,
+    userMsg: string,
+    aiMsg: string
+  ) => {
+    try {
+      // Gọi Netlify Function (Không cần await để tránh chặn UI)
+      fetch("/api/save-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          userMessage: userMsg,
+          aiMessage: aiMsg,
+        }),
+      });
+    } catch (e) {
+      console.error("Failed to save log", e);
+    }
+  };
+  // ========================
+
   const focusInput = () => {
     setTimeout(() => {
-      inputRef.current?.focus({
-        cursor: "end", // Đặt con trỏ ở cuối văn bản (nếu có)
-      });
-    }, 100); // Delay nhẹ để đảm bảo UI đã render xong trạng thái disabled=false
+      inputRef.current?.focus({ cursor: "end" });
+    }, 100);
   };
 
   const currentMessages = useMemo(
@@ -112,25 +133,8 @@ const GroqChatbot: React.FC = () => {
   );
 
   // --- EFFECTS ---
-
   useEffect(() => {
     focusInput();
-  }, []);
-
-  // 1. Google AdSense Auto Ads Script
-  // We only inject the script. Google handles Anchor/Vignette ads automatically.
-  // We do NOT use a manual <ins> unit or .push({}) here.
-  useEffect(() => {
-    const scriptId = "google-adsense-script";
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src =
-        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3585118770961536";
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      document.body.appendChild(script);
-    }
   }, []);
 
   useEffect(() => {
@@ -260,6 +264,7 @@ const GroqChatbot: React.FC = () => {
       const currentHistory =
         updatedSessions.find((s) => s.id === currentSessionId)?.messages || [];
 
+      // Thay thế bằng API thực của bạn
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -278,6 +283,8 @@ const GroqChatbot: React.FC = () => {
         setUsedModel(data.usedModel);
       }
 
+      const aiContent = data.content; // Nội dung AI trả về
+
       setSessions((prev) =>
         prev.map((s) => {
           if (s.id === currentSessionId) {
@@ -285,13 +292,17 @@ const GroqChatbot: React.FC = () => {
               ...s,
               messages: [
                 ...s.messages,
-                { role: "assistant", content: data.content },
+                { role: "assistant", content: aiContent },
               ],
             };
           }
           return s;
         })
       );
+
+      // === GỌI LƯU LOG SAU KHI CÓ KẾT QUẢ ===
+      saveChatLog(currentSessionId, contentToSend, aiContent);
+      // ======================================
     } catch (error) {
       message.error("Lỗi kết nối.");
       setSessions((prev) =>
@@ -396,7 +407,6 @@ const GroqChatbot: React.FC = () => {
                   borderRadius: 8,
                 }}
               >
-                {/* FLEX FIX FOR SIDEBAR LAYOUT */}
                 <div
                   style={{
                     display: "flex",
@@ -410,8 +420,8 @@ const GroqChatbot: React.FC = () => {
                       display: "flex",
                       alignItems: "center",
                       gap: 10,
-                      flex: 1, // Take available space
-                      minWidth: 0, // Allow shrinking below content size
+                      flex: 1,
+                      minWidth: 0,
                       overflow: "hidden",
                     }}
                   >
@@ -421,7 +431,7 @@ const GroqChatbot: React.FC = () => {
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-                        flex: 1, // Fluid width
+                        flex: 1,
                       }}
                     >
                       {session.title}
@@ -451,9 +461,6 @@ const GroqChatbot: React.FC = () => {
   );
 
   return (
-    // FIX: Use 100dvh (Dynamic Viewport Height) instead of 100vh.
-    // This allows the layout to adapt if Google's Anchor Ad adds padding to the body
-    // or if the mobile URL bar appears/disappears, preventing the "locked scroll" bug.
     <Layout style={{ height: "100dvh", overflow: "hidden" }}>
       <Sider
         width={280}
@@ -524,7 +531,6 @@ const GroqChatbot: React.FC = () => {
           </div>
         </Header>
 
-        {/* Content handles its own scrolling independently of the body/ad */}
         <Content className="chatbot-content" style={{ overflowY: "auto" }}>
           {currentMessages.length === 1 && (
             <div className="welcome-screen">
@@ -654,7 +660,6 @@ const GroqChatbot: React.FC = () => {
               }
             />
           </div>
-          {/* No manual Ad block here anymore */}
         </Footer>
       </Layout>
     </Layout>
