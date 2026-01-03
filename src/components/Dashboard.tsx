@@ -18,7 +18,7 @@ import {
 import dayjs from "dayjs";
 
 const { Header, Content } = Layout;
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 
 interface ChatLog {
   id: number;
@@ -41,7 +41,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Gọi về Netlify Function kèm mật khẩu admin
+      // Ensure your env variable is correctly set
       const res = await fetch(
         `/api/get-logs?secret=${process.env.REACT_APP_DASHBOARD_PASSWORD}`
       );
@@ -64,52 +64,73 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
       title: "Thời gian",
       dataIndex: "created_at",
       key: "created_at",
-      width: 140,
+      width: 150,
       render: (t: string) => dayjs(t).format("DD/MM/YYYY HH:mm"),
     },
     {
       title: "IP User",
       dataIndex: "user_ip",
       key: "user_ip",
-      width: 130,
+      width: 140,
       render: (ip: string) => <Tag color="blue">{ip}</Tag>,
     },
     {
       title: "Session ID",
       dataIndex: "session_id",
       key: "session_id",
-      width: 100,
+      width: 120,
       render: (id: string) => (
-        <span style={{ fontSize: 12, color: "#888" }}>{id.slice(0, 8)}...</span>
+        <Typography.Text copyable={{ text: id }}>
+          <span style={{ fontSize: 12, color: "#888" }}>
+            {id.slice(0, 8)}...
+          </span>
+        </Typography.Text>
       ),
     },
     {
       title: "Người dùng hỏi",
       dataIndex: "user_message",
       key: "user_message",
-      width: "30%",
-      render: (text: string) => <b style={{ color: "#1677ff" }}>{text}</b>,
+      width: 300,
+      render: (text: string) => (
+        <Paragraph
+          ellipsis={{
+            rows: 2,
+            expandable: true,
+            symbol: "Xem thêm",
+          }}
+          style={{ marginBottom: 0, color: "#1677ff", fontWeight: 500 }}
+        >
+          {text}
+        </Paragraph>
+      ),
     },
     {
       title: "AI Trả lời",
       dataIndex: "ai_response",
       key: "ai_response",
+      width: 400,
       render: (t: string) => (
-        <div
+        <Paragraph
+          ellipsis={{
+            rows: 3,
+            expandable: true,
+            symbol: "Xem chi tiết",
+          }}
           style={{
-            maxHeight: 80,
-            overflowY: "auto",
-            fontSize: 13,
+            marginBottom: 0,
             color: "#444",
+            whiteSpace: "pre-wrap", // Preserves line breaks/formatting
+            fontSize: 13,
           }}
         >
           {t}
-        </div>
+        </Paragraph>
       ),
     },
   ];
 
-  // Filter dữ liệu client-side
+  // Filter client-side
   const filteredData = logs.filter(
     (l) =>
       (l.user_message || "").toLowerCase().includes(searchText.toLowerCase()) ||
@@ -118,7 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
   );
 
   return (
-    <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
+    <Layout style={{ height: "100vh", background: "#f0f2f5" }}>
       <Header
         style={{
           background: "#fff",
@@ -127,6 +148,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
           justifyContent: "space-between",
           alignItems: "center",
           borderBottom: "1px solid #ddd",
+          height: 64,
+          flexShrink: 0,
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
@@ -146,25 +169,53 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
           </Button>
         </Space>
       </Header>
-      <Content style={{ padding: "20px" }}>
+
+      <Content
+        style={{
+          padding: "20px",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Card
           bordered={false}
-          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+          style={{
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden",
+          }}
+          bodyStyle={{
+            padding: 24,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="Tìm kiếm nội dung chat, IP..."
-            style={{ marginBottom: 20, maxWidth: 400 }}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <Table
-            rowKey="id"
-            columns={columns}
-            dataSource={filteredData}
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-            scroll={{ x: 800 }}
-          />
+          <div style={{ flexShrink: 0, marginBottom: 16 }}>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="Tìm kiếm nội dung chat, IP..."
+              style={{ maxWidth: 400 }}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+            />
+          </div>
+
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            <Table
+              rowKey="id"
+              columns={columns}
+              dataSource={filteredData}
+              loading={loading}
+              pagination={{ pageSize: 20 }}
+              // x: 1200 ensures horizontal scroll appears if screen is small
+              // y: true / fixed height makes the header sticky and body scrollable
+              scroll={{ x: 1200, y: "calc(100vh - 280px)" }}
+            />
+          </div>
         </Card>
       </Content>
     </Layout>
