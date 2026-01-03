@@ -11,7 +11,7 @@ const App: React.FC = () => {
   const [password, setPassword] = useState("");
 
   const handleLoginDashboard = () => {
-    if (password === process.env.DASHBOARD_PASSWORD) {
+    if (password === process.env.REACT_APP_DASHBOARD_PASSWORD) {
       setView("dashboard");
       setIsModalOpen(false);
       setPassword("");

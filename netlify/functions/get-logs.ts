@@ -9,7 +9,7 @@ export const handler: Handler = async (event) => {
   // Bảo mật đơn giản: Cần secret key trên url
   const secret = event.queryStringParameters?.secret;
 
-  if (secret !== process.env.DASHBOARD_PASSWORD) {
+  if (secret !== process.env.REACT_APP_DASHBOARD_PASSWORD) {
     // Bạn có thể đổi pass này
     return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
   }
