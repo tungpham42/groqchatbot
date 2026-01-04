@@ -147,6 +147,7 @@ const GroqChatbot: React.FC = () => {
   }, [currentMessages, isListening]);
 
   useEffect(() => {
+    // Case 1: No history exists at all -> Create new
     if (sessions.length === 0 && !currentSessionId) {
       const newId = generateId();
       const newSession: ChatSession = {
@@ -157,8 +158,19 @@ const GroqChatbot: React.FC = () => {
       };
       setSessions([newSession]);
       setCurrentSessionId(newId);
-    } else if (sessions.length > 0 && !currentSessionId) {
-      setCurrentSessionId(sessions[0].id);
+    }
+    // Case 2: History exists, but we are just loading the page -> Create new & prepend
+    else if (sessions.length > 0 && !currentSessionId) {
+      const newId = generateId();
+      const newSession: ChatSession = {
+        id: newId,
+        title: "Đoạn chat mới",
+        messages: [INITIAL_SYSTEM_MSG],
+        lastUpdated: Date.now(),
+      };
+      // Add the new session to the top of the list, keeping history below it
+      setSessions([newSession, ...sessions]);
+      setCurrentSessionId(newId);
     }
   }, [sessions, currentSessionId, INITIAL_SYSTEM_MSG]);
 
