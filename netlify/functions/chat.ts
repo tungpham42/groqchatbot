@@ -8,12 +8,11 @@ const groq = new Groq({
 
 // Danh sách Model theo thứ tự ưu tiên (Chiến thuật Fallback)
 const MODELS = [
-  "openai/gpt-oss-120b", // Model chính
-  "qwen/qwen3-32b", // Model phụ
-  "openai/gpt-oss-20b", // Model dự phòng
-  "llama-3.3-70b-versatile", // Model thông minh nhất
-  "llama-3.1-8b-instant", // Model nhanh nhất
-  "mixtral-8x7b-32768", // Model dự phòng
+  "meta-llama/llama-4-maverick-17b-128e-instruct", // 1. First Choice
+  "openai/gpt-oss-120b", // 2. Primary High-Intelligence Model
+  "openai/gpt-oss-20b", // 3. High-Quality Fallback
+  "llama-3.3-70b-versatile", // 4. Fast/Efficient Fallback
+  "llama-3.1-8b-instant", // 5. "Last Resort" Instant Model
 ];
 
 export const handler: Handler = async (event) => {
@@ -44,8 +43,8 @@ export const handler: Handler = async (event) => {
         const completion = await groq.chat.completions.create({
           messages: messages,
           model: currentModel,
-          temperature: 0.7,
-          max_tokens: 1024,
+          temperature: 0.8,
+          max_tokens: 4096,
         });
 
         // Trả về nội dung và tên model đã dùng thành công
@@ -57,7 +56,7 @@ export const handler: Handler = async (event) => {
         console.warn(
           `Model ${currentModel} failed with error: ${
             error?.status || error.message
-          }`
+          }`,
         );
 
         // Nếu lỗi là 429 (Rate Limit) hoặc 5xx (Server Error) -> Thử model tiếp theo
