@@ -8,9 +8,9 @@ const groq = new Groq({
 
 // Danh sách Model theo thứ tự ưu tiên (Chiến thuật Fallback)
 const MODELS = [
-  "meta-llama/llama-4-maverick-17b-128e-instruct", // 1. First Choice
-  "openai/gpt-oss-120b", // 2. Primary High-Intelligence Model
-  "openai/gpt-oss-20b", // 3. High-Quality Fallback
+  "openai/gpt-oss-120b", // 1. First Choice
+  "openai/gpt-oss-20b", // 2. Primary High-Intelligence Model
+  "meta-llama/llama-4-maverick-17b-128e-instruct", // 3. High-Quality Fallback
   "llama-3.3-70b-versatile", // 4. Fast/Efficient Fallback
   "llama-3.1-8b-instant", // 5. "Last Resort" Instant Model
 ];
