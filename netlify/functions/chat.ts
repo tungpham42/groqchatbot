@@ -128,8 +128,8 @@ export const handler: Handler = async (event) => {
         const completion = await groq.chat.completions.create({
           messages: augmentedMessages,
           model: currentModel,
-          temperature: 0.7, // Lowered slightly for better factual adherence
-          max_tokens: 4096,
+          temperature: 0.8, // Lowered slightly for better factual adherence
+          max_tokens: 6144,
         });
 
         // Return the AI's content and the name of the model that succeeded
