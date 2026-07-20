@@ -5,6 +5,9 @@
 [functions]
   node_bundler = "esbuild" # Giúp bundle code nhanh hơn
 
+[functions."keep-alive"]
+  schedule = "0 12 * * *"
+  
 # Redirect để gọi API thân thiện hơn
 [[redirects]]
   from = "/api/*"
