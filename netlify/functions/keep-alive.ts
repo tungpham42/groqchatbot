@@ -43,8 +43,8 @@ export const handler: Handler = async (event, context) => {
   }
 };
 
-// Netlify Cron Schedule: Runs at midnight every Monday and Thursday
+// Netlify Cron Schedule: Runs at noon every Monday and Thursday
 // Matches the logic used in your initial keep-alive setup
 export const config = {
-  schedule: "0 0 * * 1,4",
+  schedule: "0 12 * * *",
 };
