@@ -111,13 +111,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/get-logs?secret=${process.env.REACT_APP_DASHBOARD_PASSWORD}`
+        `/api/get-logs?secret=${process.env.REACT_APP_DASHBOARD_PASSWORD}`,
       );
       if (!res.ok) throw new Error("Lỗi xác thực hoặc server");
       const data = await res.json();
       setLogs(data);
     } catch (error) {
-      message.error("Không thể tải dữ liệu logs.");
+      message.error("Không thể tải dữ liệu logs." + (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -187,7 +187,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
     (l) =>
       (l.user_message || "").toLowerCase().includes(searchText.toLowerCase()) ||
       (l.ai_response || "").toLowerCase().includes(searchText.toLowerCase()) ||
-      (l.user_ip || "").includes(searchText)
+      (l.user_ip || "").includes(searchText),
   );
 
   return (
